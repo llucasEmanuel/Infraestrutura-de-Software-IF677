@@ -30,7 +30,8 @@ void *bubble_sort(void *arg) {
     Limit lim = *((Limit *) arg);
     for (int i = lim.l; i <= lim.r - 1; i++) {
         for (int j = lim.l; j <= lim.r - 1 - i; j++) {
-            swap(array, j);
+            if (array[j] > array[j+1]) 
+                swap(array, j);
         }
     }
 
