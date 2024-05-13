@@ -1,4 +1,6 @@
 #define _XOPEN_SOURCE 600
+#define NUM_THREADS_ORD 2
+#define ARRAY_SIZE 10
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
@@ -13,10 +15,8 @@ typedef struct {
     pthread_t th_ord;
 } SubArray;
 
-int array[] = {4, 9, 6, 1, 3, 10, 2, 7, 5, 8};
-const int array_size = 10;
-const int num_threads_ord = 2; // divide em 2 subarrays
-SubArray subarrays[num_threads_ord]; // subarray de cada threae
+int array[ARRAY_SIZE] = {4, 9, 6, 1, 3, 10, 2, 7, 5, 8};
+SubArray subarrays[NUM_THREADS_ORD]; // subarray de cada threae
 pthread_t thread_merge;
 pthread_barrier_t barreira; // sincronizar as ordenacoes parciais
 
@@ -35,25 +35,26 @@ void *bubble_sort(void *arg) {
         }
     }
 
+
     pthread_barrier_wait(&barreira); // espera as outras threads concluirem a ordenação
     pthread_exit(NULL);
 }
 
 int main() {
 
-    pthread_barrier_init(&barreira, NULL, num_threads_ord);
-    int sub_size = (array_size / num_threads_ord);
-    for (int i = 0; i < num_threads_ord; i++) {
+    pthread_barrier_init(&barreira, NULL, NUM_THREADS_ORD);
+    int sub_size = (ARRAY_SIZE / NUM_THREADS_ORD);
+    for (int i = 0; i < NUM_THREADS_ORD; i++) {
         subarrays[i].lim.l = i*sub_size;
         subarrays[i].lim.r = subarrays[i].lim.l + sub_size - 1;
         pthread_create(&subarrays[i].th_ord, NULL, bubble_sort, (void *) &subarrays[i].lim);
     }
 
-    for (int i = 0; i < array_size; i++) {
+    for (int i = 0; i < NUM_THREADS_ORD; i++) {
         pthread_join(subarrays[i].th_ord, NULL);
     }
     
-    for (int i = 0; i < array_size; i++) {
+    for (int i = 0; i < ARRAY_SIZE; i++) {
         printf("%d ", array[i]);
     }
     printf("\n");
